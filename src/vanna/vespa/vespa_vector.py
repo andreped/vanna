@@ -1,3 +1,4 @@
+from vespa.deployment import VespaDocker
 from vespa.package import ApplicationPackage, Field, RankProfile
 
 from ..base import VannaBase
@@ -10,12 +11,12 @@ class Vespa_VectorStore(VannaBase):
         if config is None:
             raise ValueError("config is required")
 
-        self.n_results = config.get("n_results", 3)
+        self.n_results = config.get("n_results", 10)
 
-        app_package = ApplicationPackage(name="testapp")
+        app_package = ApplicationPackage(name="text2sql-vectorstore")
         app_package.schema.add_fields(
             Field(
-                name="text", type="string", indexing=["index", "summary"], index="enable-bm25"
+                name="text", type="string", indexing=["index", "summary"], index="enable-bm25",
             ),
             Field(
                 name="embedding",
@@ -31,3 +32,6 @@ class Vespa_VectorStore(VannaBase):
                 inputs=[("query(query_embedding)", "tensor<float>(x[384])")],
             )
         )
+
+        vespa_docker = VespaDocker()
+        vespa_app = vespa_docker.deploy(application_package=app_package)
